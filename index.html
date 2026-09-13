@@ -1,46 +1,361 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Birthday! 🎉</title>
+    <title>A Secret Birthday Surprise 🎉</title>
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body {
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Great+Vibes&display=swap');
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            height: 100vh;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-            font-family: sans-serif;
+            background: radial-gradient(circle, #2c3e50 0%, #000000 100%);
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
             text-align: center;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
         }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 80%;
+
+        /* --- STAGE 1: CAKE ANIMATION --- */
+        #cakeStage {
+            animation: bounceIn 1.5s ease forwards;
         }
-        h1 { color: #ff4757; }
-        .bday-img {
-            width: 250px;
-            height: 250px;
+
+        .cake-instruction {
+            margin-top: 25px;
+            font-size: 1.1rem;
+            color: #f1c40f;
+            letter-spacing: 1px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .cake-wrapper {
+            position: relative;
+            width: 150px;
+            height: 140px;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+
+        .cake {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 90px;
+            background: #ff6b81;
+            border-radius: 15px 15px 10px 10px;
+            box-shadow: 0 10px 25px rgba(255, 107, 129, 0.4), inset 0 -10px 0 #ee5253;
+        }
+
+        .cake::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .candle {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 45px;
+            background: linear-gradient(to right, #74b9ff, #0984e3);
+            border-radius: 4px;
+            z-index: 2;
+        }
+
+        .flame {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 24px;
+            background: #ff9f43;
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 15px #ff9f43, 0 0 30px #ff9f43;
+            animation: flicker 0.6s infinite alternate;
+            transition: opacity 0.5s ease;
+        }
+
+        .flame.off {
+            opacity: 0;
+        }
+
+        /* --- STAGE 2: PASSCODE BOX --- */
+        #passStage {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 35px 25px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: zoomIn 0.8s ease forwards;
+        }
+
+        #passStage h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #ff758c;
+        }
+
+        .pass-input-group {
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 14px;
+            font-size: 1.3rem;
+            border-radius: 30px;
+            border: 2px solid #ff758c;
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            text-align: center;
+            letter-spacing: 3px;
+            outline: none;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 15px #ff758c;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .unlock-btn {
+            margin-top: 20px;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(45deg, #ff758c, #ff7eb3);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 117, 140, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .unlock-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(255, 117, 140, 0.6);
+        }
+
+        .error-msg {
+            color: #ff4757;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            display: none;
+            animation: shake 0.4s ease;
+        }
+
+        /* --- STAGE 3: BIRTHDAY SURPRISE CARD --- */
+        #wishStage {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 35px 25px;
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            animation: slideUp 1s ease forwards;
+        }
+
+        .profile-img {
+            width: 170px;
+            height: 170px;
             object-fit: cover;
             border-radius: 50%;
-            border: 5px solid #ff4757;
-            margin-bottom: 15px;
+            border: 5px solid #ff758c;
+            box-shadow: 0 10px 25px rgba(255, 117, 140, 0.5);
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .wish-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.2rem;
+            color: #ff758c;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .wish-text {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .heart-icon {
+            color: #ff758c;
+            font-size: 1.5rem;
+            animation: pulse 1s infinite;
+        }
+
+        /* ANIMATIONS */
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+            100% { transform: translateX(-50%) scale(1.15); opacity: 1; box-shadow: 0 0 25px #ff9f43; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: translateY(100px); }
+            60% { opacity: 1; transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.7); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <!-- මෙතැනට ඔබේ Google Drive Image Link එක දමන්න -->
-        <img src="https://drive.google.com/thumbnail?id=ඔබගේ_IMAGE_ID_එක&sz=w1000" class="bday-img" alt="Birthday Photo">
+
+    <!-- MPEG Audio file from GitHub -->
+    <audio id="bdayAudio" loop preload="auto">
+        <source src="song.mpeg" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
         
-        <h1>🎂 Happy Birthday! 🎈</h1>
-        <p>ඔයාගේ හැම හීනයක්ම සැබෑවෙන ලස්සන අනාගතයකට සුභ පතනවා! ❤️</p>
+        <!-- STAGE 1: Cake & Candle -->
+        <div id="cakeStage">
+            <div class="cake-wrapper" onclick="blowCandle()">
+                <div class="flame" id="flame"></div>
+                <div class="candle"></div>
+                <div class="cake"></div>
+            </div>
+            <p class="cake-instruction">✨ Tap the Candle to Blow it Out! ✨</p>
+        </div>
+
+        <!-- STAGE 2: Secret Code Lock -->
+        <div id="passStage">
+            <h2>🔒 Secret Access</h2>
+            <p style="font-size: 0.95rem; color: #ccc;">Enter the Secret Code to unlock your Birthday Surprise!</p>
+            <div class="pass-input-group">
+                <input type="text" id="passInput" placeholder="ENTER CODE" maxlength="10">
+                <br>
+                <button class="unlock-btn" onclick="checkCode()">UNLOCK 🎉</button>
+            </div>
+            <div class="error-msg" id="errorMsg">Incorrect Secret Code! Try Again ❌</div>
+        </div>
+
+        <!-- STAGE 3: Birthday Wish & Photo -->
+        <div id="wishStage">
+            <!-- JPEG Photo file from GitHub -->
+            <img src="bphoto.jpeg" class="profile-img" alt="Birthday Person">
+            
+            <h1 class="wish-title">Happy Birthday!</h1>
+            
+            <p class="wish-text">
+                To my dearest <b>Ammu</b>, the one who brings so much magic and brightness into my world... 🌸✨<br><br>
+                On your special day, I wish you endless happiness, beautiful moments, and a year filled with every dream your heart holds. 
+                May your beautiful smile always light up every room you walk into. Happy Birthday to someone truly special to me!<br><br>
+                <b>With all my love,<br>Nehara ❤️</b>
+            </p>
+
+            <div class="heart-icon">❤️✨🎉</div>
+        </div>
+
     </div>
+
+    <script>
+        const audio = document.getElementById('bdayAudio');
+
+        function blowCandle() {
+            const flame = document.getElementById('flame');
+            flame.classList.add('off');
+
+            audio.play().catch(e => console.log("Audio waiting for user click."));
+
+            setTimeout(() => {
+                document.getElementById('cakeStage').style.display = 'none';
+                document.getElementById('passStage').style.display = 'block';
+            }, 800);
+        }
+
+        function checkCode() {
+            const inputVal = document.getElementById('passInput').value.trim().toUpperCase();
+            const secretCode = "WANDY";
+
+            if (inputVal === secretCode) {
+                audio.play();
+
+                document.getElementById('passStage').style.display = 'none';
+                document.getElementById('wishStage').style.display = 'block';
+                document.body.style.background = "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)";
+                
+                launchConfetti();
+            } else {
+                const error = document.getElementById('errorMsg');
+                error.style.display = 'block';
+                document.getElementById('passInput').style.borderColor = '#ff4757';
+            }
+        }
+
+        function launchConfetti() {
+            var duration = 4 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+    </script>
+
 </body>
 </html>
